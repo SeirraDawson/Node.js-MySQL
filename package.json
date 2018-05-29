@@ -1,0 +1,32 @@
+{
+  "name": "node.j-mysql",
+  "version": "1.0.0",
+  "description": "bamazon hw",
+  "main": "index.js",
+  "dependencies": {
+    "chalk": "^2.4.1",
+    "console.table": "^0.10.0",
+    "dotenv": "^5.0.1",
+    "eslint": "^4.19.1",
+    "inquirer": "^5.2.0",
+    "mysql": "^2.15.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SeirraDawson/Node.js-MySQL.git"
+  },
+  "keywords": [
+    "node.js",
+    "mysql"
+  ],
+  "author": "Seirra Dawson",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/SeirraDawson/Node.js-MySQL/issues"
+  },
+  "homepage": "https://github.com/SeirraDawson/Node.js-MySQL#readme"
+}
