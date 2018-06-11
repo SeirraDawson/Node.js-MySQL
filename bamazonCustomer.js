@@ -21,13 +21,13 @@ var connection = mysql.createConnection({
 // start database connection && connection successful
 connection.connect(function(err) {
   if (err) throw err;
-  console.log('Successful connection! ' , connection.threadId + "\n\n"); //threadid is a process id from mySQL 
+  console.log('Successful connection! ' , connection.threadId + "\n"); //threadid is a process id from mySQL 
   displayProducts();
 }); // closing connection function
 
 //query the database for all of the products available for sale (ids, name, and prices)
 function displayProducts() {
-  console.log("Hello && Thanks for shopping @ Bamazon!\n\n")
+  console.log("Hello & Thanks for shopping @ Bamazon!\n")
   connection.query("SELECT * FROM products", function(err,res) {
     if (err) throw err;
     // callback function that displays the table
@@ -66,67 +66,61 @@ function showTable(res) {
 function promptPurchase() {
   //once the items load, prompt users with two messages in begin purchase
   inquirer
-    .prompt([
-      {
-        name: "item_id",
-        type: "input",
-        message: "What product ID you would like to purchase?\n\n"
-      },
-      {
-        name: "stock_quantity",
-        type: "input",
-        message: "How many would you like to purchases?\n\n"
+    .prompt([{
+      name: "item_id",
+      type: "input",
+      message: "Which product ID you would like to purchase?",
+      //validate to check response
+      validate: function(value) {
+        if (isNaN(value) == false) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }, {
+      name: "stock_quantity",
+      type: "input",
+      message: "How many would you like to purchases?",
+      //validate to check response
+      validate: function(value) {
+        if (isNaN(value) == false) {
+          return true;
+        } else {
+          return false;
+        }
       } // end of prompt
-  ]) // end of inquirer
+  }]) // end of inquirer
+  //  Once the customer has placed the order, your application should check if your store has enough of the product to meet the customer's request.
   .then(function(answer) {
-    connection.query('SELECT * FROM `products` WHERE ?', {
-			item_id: answer.item_id
-    },
-    function (err, res) {
-      if (err) throw err;
-      // condense naming convention for res[i]
-      var name = res[0].product_name;
-      var quantity = res[0].stock_quantity;
-      var total = res[0].price * answer.quantity;
-      // Check the inventory of the product
-      if (answer.quantity <= quantity) {
-        // Update the product in database
-        var newQ = quantity - answer.quantity;
-        connection.query("UPDATE products SET ? WHERE ?", [{
-          stock_quantity: newQuantity
-        },
-        {
-          item_id: answer.item_id
-        }],
-          function(err, res) {
-            if (err) throw err;
-            //Complete the transaction
-            inquirer
-              .prompt([
-                {
-                  name: "return",
-                  type:"list",
-                  message: "Purchase successful!\nItem: " + name +
-                            "\nQuantity: " + answer.quantity +
-                            "\nTotal: $" + total,
-                  choices: ["Return"]
-                }]).then(function(answer){
-                  displayProducts();
-                }); //end of .then(function(answer))
-          }); // end of function
-        } 
-        else {
-          inquirer
-              .prompt([
-                {
-                  name: "error",
-                  type:"list",
-                  message: "Insufficient Stock!",
-                  choices: ["Return"]
-                }]).then(function(answer){
-                  displayProducts();
-                }); // end of else
-        } // end of function(err, res)
-      });
-    });
+      //Complete the transaction
+      console.log(answer);
+      var item_id = answer.item;
+      console.log(item_id);
+      var chosenItem = res[item_id-1];
+      console.log(chosenItem);
+      var newQuantity = chosenItem.stock_quantity - answer.quantity
+      if (newQuantity >= 0) {
+        connection.query('UPDATE products SET ? WHERE item_id = ?', [{ stock_quantity: newQuantity }, item_id]);
+        console.log("Purchase successful!\n");
+        stopBamazon();
+      // If not, the app should log a phrase like `Insufficient quantity!`, and then prevent the order from going through.
+      } else{
+        inquirer
+            .prompt([
+              {
+                name: "error",
+                type:"list",
+                message: "Insufficient Stock!",
+                choices: ["Return"]
+              }]).then(function(answer){
+                displayProducts();
+        }); // end of else)
+      }
+    })
+  }
+
+  //stop bamazon 
+  var stopBamazon = function() {
+    connection.end();
   }
